@@ -1,233 +1,326 @@
-<!-- Navbar -->
-<div class="navbar bg-base-100 shadow-lg">
-  <div class="flex-1">
-    <a class="btn btn-ghost text-xl">📦 Inventory Manager</a>
-  </div>
-  <div class="flex-none">
-    @if (lowStockItems().length > 0) {
-      <div class="badge badge-error gap-2">
-        {{ lowStockItems().length }} críticos
+<!-- Toast Notifications -->
+<app-toast></app-toast>
+
+<!-- Main Layout -->
+<div class="min-h-screen bg-slate-50">
+  <!-- Navbar -->
+  <nav class="bg-white shadow-sm border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-slate-900">IT Inventory Manager</h1>
+            <p class="text-xs text-slate-500">Dashboard de Control</p>
+          </div>
+        </div>
+        @if (lowStockItems().length > 0) {
+          <div class="flex items-center space-x-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-sm font-semibold text-red-700">{{ lowStockItems().length }} items críticos</span>
+          </div>
+        }
+      </div>
+    </div>
+  </nav>
+
+  <!-- Container -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <!-- Total Items -->
+      <div class="bg-white rounded-xl shadow-md p-6 border border-slate-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-slate-600">Total Items</p>
+            <p class="text-3xl font-bold text-slate-900 mt-2">{{ totalItems() }}</p>
+            <p class="text-xs text-slate-500 mt-1">En inventario</p>
+          </div>
+          <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Low Stock -->
+      <div class="bg-white rounded-xl shadow-md p-6 border border-slate-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-slate-600">Stock Crítico</p>
+            <p class="text-3xl font-bold text-red-600 mt-2">{{ lowStockItems().length }}</p>
+            <p class="text-xs text-slate-500 mt-1">Requieren reposición</p>
+          </div>
+          <div class="w-14 h-14 bg-red-100 rounded-lg flex items-center justify-center">
+            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Value -->
+      <div class="bg-white rounded-xl shadow-md p-6 border border-slate-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-slate-600">Valor Total</p>
+            <p class="text-3xl font-bold text-emerald-600 mt-2">${{ totalValue().toLocaleString('en-US', {minimumFractionDigits: 2}) }}</p>
+            <p class="text-xs text-slate-500 mt-1">Inventario total</p>
+          </div>
+          <div class="w-14 h-14 bg-emerald-100 rounded-lg flex items-center justify-center">
+            <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (loading() && items().length === 0) {
+      <div class="flex justify-center items-center py-20">
+        <div class="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+      </div>
+    }
+
+    <!-- Items Grid -->
+    @if (items().length > 0) {
+      <div>
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-slate-900">Productos en Inventario</h2>
+          <span class="text-sm text-slate-500">{{ items().length }} items</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (item of items(); track item.id) {
+            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-200">
+              <!-- Card Header -->
+              <div class="p-6">
+                <div class="flex justify-between items-start mb-3">
+                  <h3 class="text-lg font-bold text-slate-900">{{ item.name }}</h3>
+                  <span [class]="'px-3 py-1 text-xs font-semibold rounded-full ' + getCategoryStyle(item.category)">
+                    {{ item.category }}
+                  </span>
+                </div>
+
+                <p class="text-sm text-slate-600 mb-4 line-clamp-2">{{ item.description || 'Sin descripción' }}</p>
+
+                <!-- Stock Status -->
+                <div class="mb-4">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-slate-700">Stock Disponible</span>
+                    <span [class]="'px-2 py-1 text-xs font-bold rounded ' + (isLowStock(item) ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700')">
+                      {{ item.stock }} unidades
+                    </span>
+                  </div>
+
+                  <!-- Progress Bar -->
+                  <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                    <div
+                      [class]="'h-full transition-all duration-500 ' + (isLowStock(item) ? 'bg-red-500' : 'bg-emerald-500')"
+                      [style.width.%]="(item.stock / (item.criticalLimit * 2)) * 100"
+                    ></div>
+                  </div>
+
+                  <div class="flex justify-between mt-1">
+                    <span class="text-xs text-slate-500">Min: {{ item.criticalLimit }}</span>
+                    <span class="text-xs text-slate-500">Max: {{ item.criticalLimit * 2 }}</span>
+                  </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="border-t border-slate-200 my-4"></div>
+
+                <!-- Details -->
+                <div class="space-y-2 mb-4">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-slate-600">Precio Unitario</span>
+                    <span class="text-sm font-bold text-slate-900">${{ item.unitPrice.toFixed(2) }}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-slate-600">Valor en Stock</span>
+                    <span class="text-sm font-bold text-emerald-600">${{ (item.stock * item.unitPrice).toFixed(2) }}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-slate-600">Límite Crítico</span>
+                    <span class="text-sm font-bold text-slate-900">{{ item.criticalLimit }} unidades</span>
+                  </div>
+                </div>
+
+                <!-- Status Badge -->
+                @if (isLowStock(item)) {
+                  <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                    <div class="flex items-center space-x-2">
+                      <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                      </svg>
+                      <span class="text-sm font-semibold text-red-700">Stock Crítico - Reposición Necesaria</span>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4">
+                    <div class="flex items-center space-x-2">
+                      <svg class="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                      </svg>
+                      <span class="text-sm font-semibold text-emerald-700">Stock Saludable</span>
+                    </div>
+                  </div>
+                }
+
+                <!-- Action Button -->
+                <button
+                  (click)="openTransactionModal(item)"
+                  class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-3 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                  </svg>
+                  <span>Registrar Movimiento</span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
       </div>
     }
   </div>
 </div>
 
-<!-- Toast Notifications -->
-<app-toast></app-toast>
-
-<!-- Main Container -->
-<div class="container mx-auto px-4 py-8">
-  <!-- Stats Cards -->
-  <div class="stats shadow mb-8 w-full">
-    <div class="stat">
-      <div class="stat-figure text-primary">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-      </div>
-      <div class="stat-title">Total Items</div>
-      <div class="stat-value text-primary">{{ totalItems() }}</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-figure text-error">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-      </div>
-      <div class="stat-title">Stock Crítico</div>
-      <div class="stat-value text-error">{{ lowStockItems().length }}</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-figure text-success">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-      </div>
-      <div class="stat-title">Valor Total</div>
-      <div class="stat-value text-success">${{ totalValue().toFixed(2) }}</div>
-    </div>
-  </div>
-
-  <!-- Loading State -->
-  @if (loading() && items().length === 0) {
-    <div class="flex justify-center items-center py-20">
-      <span class="loading loading-spinner loading-lg"></span>
-    </div>
-  }
-
-  <!-- Items Grid -->
-  @if (items().length > 0) {
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      @for (item of items(); track item.id) {
-        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-          <div class="card-body">
-            <!-- Header with Badge -->
-            <div class="flex justify-between items-start mb-2">
-              <h2 class="card-title text-lg">{{ item.name }}</h2>
-              <div [class]="'badge ' + getCategoryBadge(item.category)">
-                {{ item.category }}
-              </div>
-            </div>
-
-            <!-- Description -->
-            <p class="text-sm opacity-70 mb-4">{{ item.description || 'Sin descripción' }}</p>
-
-            <!-- Stock Badge -->
-            <div class="flex items-center gap-2 mb-3">
-              <span class="font-semibold">Stock:</span>
-              <div [class]="'badge badge-lg ' + (isLowStock(item) ? 'badge-error' : 'badge-success')">
-                {{ item.stock }} unidades
-              </div>
-            </div>
-
-            <!-- Progress Bar -->
-            <div class="mb-4">
-              <div class="flex justify-between text-xs mb-1">
-                <span>Nivel de stock</span>
-                <span>{{ ((item.stock / (item.criticalLimit * 2)) * 100).toFixed(0) }}%</span>
-              </div>
-              <progress
-                [class]="'progress ' + (isLowStock(item) ? 'progress-error' : 'progress-success')"
-                [value]="item.stock"
-                [max]="item.criticalLimit * 2"
-              ></progress>
-            </div>
-
-            <!-- Details -->
-            <div class="divider my-2"></div>
-            <div class="grid grid-cols-2 gap-2 text-sm mb-4">
-              <div>
-                <span class="opacity-70">Precio:</span>
-                <span class="font-semibold ml-1">${{ item.unitPrice.toFixed(2) }}</span>
-              </div>
-              <div>
-                <span class="opacity-70">Valor:</span>
-                <span class="font-semibold ml-1">${{ (item.stock * item.unitPrice).toFixed(2) }}</span>
-              </div>
-              <div class="col-span-2">
-                <span class="opacity-70">Límite crítico:</span>
-                <span class="font-semibold ml-1">{{ item.criticalLimit }} unidades</span>
-              </div>
-            </div>
-
-            <!-- Action Button -->
-            <div class="card-actions justify-end">
-              <button
-                (click)="openTransactionModal(item)"
-                class="btn btn-primary btn-sm"
-              >
-                Registrar Movimiento
-              </button>
-            </div>
-          </div>
-        </div>
-      }
-    </div>
-  }
-</div>
-
 <!-- Transaction Modal -->
 @if (showModal() && selectedItem()) {
-  <div class="modal modal-open">
-    <div class="modal-box max-w-md">
-      <h3 class="font-bold text-lg mb-2">Registrar Movimiento</h3>
-      <p class="text-sm opacity-70 mb-4">{{ selectedItem()!.name }}</p>
-
-      <!-- Error Alert -->
-      @if (error()) {
-        <div class="alert alert-error mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          <span>{{ error() }}</span>
+  <div class="fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900">Registrar Movimiento</h3>
+            <p class="text-sm text-slate-600 mt-1">{{ selectedItem()!.name }}</p>
+          </div>
+          <button
+            (click)="closeModal()"
+            class="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-100 transition-colors"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
         </div>
-      }
+      </div>
 
-      <!-- Current Stock -->
-      <div class="alert alert-info mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <!-- Modal Body -->
+      <div class="px-6 py-6 space-y-5">
+        <!-- Error -->
+        @if (error()) {
+          <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+              </svg>
+              <p class="text-sm font-medium text-red-700">{{ error() }}</p>
+            </div>
+          </div>
+        }
+
+        <!-- Current Stock -->
+        <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-xl">
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-semibold text-indigo-900">Stock Actual</span>
+            <span class="text-3xl font-bold text-indigo-700">{{ selectedItem()!.stock }}</span>
+          </div>
+        </div>
+
+        <!-- Transaction Type -->
         <div>
-          <div class="text-xs">Stock actual</div>
-          <div class="text-2xl font-bold">{{ selectedItem()!.stock }}</div>
+          <label class="block text-sm font-semibold text-slate-700 mb-3">Tipo de Movimiento</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button
+              (click)="transactionType.set(TransactionType.ENTRADA); error.set(null)"
+              [class]="transactionType() === TransactionType.ENTRADA ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white text-slate-700 border-2 border-slate-300 hover:border-emerald-400'"
+              class="py-3 px-4 rounded-lg font-semibold transition-all duration-200"
+            >
+              ⬆️ ENTRADA
+            </button>
+            <button
+              (click)="transactionType.set(TransactionType.SALIDA); error.set(null)"
+              [class]="transactionType() === TransactionType.SALIDA ? 'bg-red-600 text-white shadow-lg' : 'bg-white text-slate-700 border-2 border-slate-300 hover:border-red-400'"
+              class="py-3 px-4 rounded-lg font-semibold transition-all duration-200"
+            >
+              ⬇️ SALIDA
+            </button>
+          </div>
         </div>
-      </div>
 
-      <!-- Transaction Type -->
-      <div class="form-control mb-4">
-        <label class="label">
-          <span class="label-text font-semibold">Tipo de Movimiento</span>
-        </label>
-        <div class="btn-group w-full">
-          <button
-            (click)="transactionType.set(TransactionType.ENTRADA); error.set(null)"
-            [class]="transactionType() === TransactionType.ENTRADA ? 'btn btn-success btn-active' : 'btn'"
-            class="flex-1"
-          >
-            ⬆️ ENTRADA
-          </button>
-          <button
-            (click)="transactionType.set(TransactionType.SALIDA); error.set(null)"
-            [class]="transactionType() === TransactionType.SALIDA ? 'btn btn-error btn-active' : 'btn'"
-            class="flex-1"
-          >
-            ⬇️ SALIDA
-          </button>
+        <!-- Quantity -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Cantidad</label>
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="quantity"
+            (ngModelChange)="quantity.set($event); error.set(null)"
+            class="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-lg font-semibold"
+          />
         </div>
-      </div>
 
-      <!-- Quantity -->
-      <div class="form-control mb-4">
-        <label class="label">
-          <span class="label-text font-semibold">Cantidad</span>
-        </label>
-        <input
-          type="number"
-          min="1"
-          [(ngModel)]="quantity"
-          (ngModelChange)="quantity.set($event); error.set(null)"
-          class="input input-bordered"
-        />
-      </div>
+        <!-- User -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Usuario (opcional)</label>
+          <input
+            type="text"
+            [(ngModel)]="userName"
+            (ngModelChange)="userName.set($event)"
+            placeholder="Tu nombre"
+            class="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
 
-      <!-- User (optional) -->
-      <div class="form-control mb-4">
-        <label class="label">
-          <span class="label-text">Usuario (opcional)</span>
-        </label>
-        <input
-          type="text"
-          [(ngModel)]="userName"
-          (ngModelChange)="userName.set($event)"
-          placeholder="Tu nombre"
-          class="input input-bordered"
-        />
-      </div>
-
-      <!-- Preview -->
-      <div [class]="'alert mb-4 ' + (transactionType() === TransactionType.ENTRADA ? 'alert-success' : 'alert-warning')">
-        <div class="w-full text-center">
-          <div class="text-xs opacity-70">Nuevo stock</div>
-          <div class="text-3xl font-bold">
-            @if (transactionType() === TransactionType.ENTRADA) {
-              {{ selectedItem()!.stock + quantity() }}
-            } @else {
-              {{ selectedItem()!.stock - quantity() }}
-            }
+        <!-- Preview -->
+        <div [class]="'p-4 rounded-xl border-2 ' + (transactionType() === TransactionType.ENTRADA ? 'bg-emerald-50 border-emerald-300' : 'bg-amber-50 border-amber-300')">
+          <div class="text-center">
+            <p class="text-sm font-medium text-slate-600 mb-1">Nuevo Stock</p>
+            <p [class]="'text-4xl font-bold ' + (transactionType() === TransactionType.ENTRADA ? 'text-emerald-700' : 'text-amber-700')">
+              @if (transactionType() === TransactionType.ENTRADA) {
+                {{ selectedItem()!.stock + quantity() }}
+              } @else {
+                {{ selectedItem()!.stock - quantity() }}
+              }
+            </p>
           </div>
         </div>
       </div>
 
-      <!-- Actions -->
-      <div class="modal-action">
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end space-x-3">
         <button
           (click)="closeModal()"
           [disabled]="loading()"
-          class="btn"
+          class="px-5 py-2.5 border-2 border-slate-300 rounded-lg text-slate-700 font-semibold hover:bg-slate-100 disabled:opacity-50 transition-colors"
         >
           Cancelar
         </button>
         <button
           (click)="submitTransaction()"
           [disabled]="loading() || quantity() < 1"
-          [class]="transactionType() === TransactionType.ENTRADA ? 'btn btn-success' : 'btn btn-error'"
+          [class]="transactionType() === TransactionType.ENTRADA ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'"
+          class="px-6 py-2.5 rounded-lg text-white font-semibold disabled:opacity-50 transition-colors shadow-md hover:shadow-lg"
         >
           @if (loading()) {
-            <span class="loading loading-spinner"></span>
-            Procesando...
+            <span class="flex items-center space-x-2">
+              <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Procesando...</span>
+            </span>
           } @else {
             Confirmar
           }
@@ -236,3 +329,12 @@
     </div>
   </div>
 }
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
