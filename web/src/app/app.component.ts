@@ -178,4 +178,13 @@ export class AppComponent implements OnInit {
     };
     return backgrounds[category] || 'bg-slate-500';
   }
+
+  getCategoryBadge(category: string): string {
+    const badges: { [key: string]: string } = {
+      Hardware: 'badge-primary',
+      Papelería: 'badge-success',
+      Periféricos: 'badge-secondary',
+    };
+    return badges[category] || 'badge-neutral';
+  }
 }
