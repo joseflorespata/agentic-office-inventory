@@ -51,6 +51,34 @@ npm run start:prod
 - `POST /api/items` - Crear un nuevo item
 - `PATCH /api/items/:id` - Actualizar un item
 - `DELETE /api/items/:id` - Eliminar un item
+- `POST /api/items/:id/transaction` - Registrar una transacción de stock
+
+### Transacciones
+
+#### POST /api/items/:id/transaction
+
+Registra una entrada o salida de stock para un item.
+
+**Request Body:**
+```json
+{
+  "type": "ENTRADA" | "SALIDA",
+  "quantity": number,
+  "user": "string (opcional)"
+}
+```
+
+**Response:** Item actualizado con el nuevo stock
+
+**Validaciones:**
+- La cantidad debe ser mayor a 0
+- Para SALIDA: no se permite retirar más stock del disponible
+- No se permiten stocks negativos bajo ninguna circunstancia
+
+**Códigos de respuesta:**
+- `200 OK` - Transacción exitosa
+- `400 Bad Request` - Stock insuficiente o validación fallida
+- `404 Not Found` - Item no existe
 
 ## Entidad Item
 

@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ItemsService = void 0;
 const common_1 = require("@nestjs/common");
 const item_entity_1 = require("./entities/item.entity");
+const transaction_entity_1 = require("./entities/transaction.entity");
 let ItemsService = class ItemsService {
     mockItems = [
         {
@@ -74,13 +75,50 @@ let ItemsService = class ItemsService {
         return this.mockItems;
     }
     findOne(id) {
-        return `This action returns a #${id} item`;
+        const item = this.mockItems.find((item) => item.id === id);
+        if (!item) {
+            throw new common_1.NotFoundException(`Item con ID ${id} no encontrado`);
+        }
+        return item;
     }
     update(id, updateItemDto) {
         return `This action updates a #${id} item`;
     }
     remove(id) {
         return `This action removes a #${id} item`;
+    }
+    createTransaction(itemId, createTransactionDto) {
+        const item = this.findOne(itemId);
+        const previousStock = item.stock;
+        if (createTransactionDto.type === transaction_entity_1.TransactionType.SALIDA) {
+            if (createTransactionDto.quantity > item.stock) {
+                throw new common_1.BadRequestException(`Stock insuficiente. Stock actual: ${item.stock}, cantidad solicitada: ${createTransactionDto.quantity}`);
+            }
+        }
+        let newStock;
+        if (createTransactionDto.type === transaction_entity_1.TransactionType.ENTRADA) {
+            newStock = item.stock + createTransactionDto.quantity;
+        }
+        else {
+            newStock = item.stock - createTransactionDto.quantity;
+        }
+        if (newStock < 0) {
+            throw new common_1.BadRequestException('La transacción resultaría en stock negativo');
+        }
+        item.stock = newStock;
+        item.updatedAt = new Date();
+        const transaction = {
+            id: Date.now(),
+            itemId: item.id,
+            item: item,
+            type: createTransactionDto.type,
+            quantity: createTransactionDto.quantity,
+            previousStock,
+            newStock,
+            user: createTransactionDto.user || 'system',
+            timestamp: new Date(),
+        };
+        return item;
     }
 };
 exports.ItemsService = ItemsService;

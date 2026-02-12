@@ -1,7 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
 
 @Controller('items')
 export class ItemsController {
@@ -20,6 +29,14 @@ export class ItemsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.itemsService.findOne(+id);
+  }
+
+  @Post(':id/transaction')
+  createTransaction(
+    @Param('id') id: string,
+    @Body() createTransactionDto: CreateTransactionDto,
+  ) {
+    return this.itemsService.createTransaction(+id, createTransactionDto);
   }
 
   @Patch(':id')

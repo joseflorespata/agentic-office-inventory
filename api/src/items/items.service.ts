@@ -1,7 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Item, ItemCategory } from './entities/item.entity';
+import { Transaction, TransactionType } from './entities/transaction.entity';
 
 @Injectable()
 export class ItemsService {
@@ -72,8 +78,12 @@ export class ItemsService {
     return this.mockItems;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} item`;
+  findOne(id: number): Item {
+    const item = this.mockItems.find((item) => item.id === id);
+    if (!item) {
+      throw new NotFoundException(`Item con ID ${id} no encontrado`);
+    }
+    return item;
   }
 
   update(id: number, updateItemDto: UpdateItemDto) {
@@ -82,5 +92,63 @@ export class ItemsService {
 
   remove(id: number) {
     return `This action removes a #${id} item`;
+  }
+
+  createTransaction(
+    itemId: number,
+    createTransactionDto: CreateTransactionDto,
+  ): Item {
+    // 1. Buscar el item
+    const item = this.findOne(itemId);
+
+    // 2. Guardar stock anterior
+    const previousStock = item.stock;
+
+    // 3. Validar stock para SALIDA
+    if (createTransactionDto.type === TransactionType.SALIDA) {
+      if (createTransactionDto.quantity > item.stock) {
+        throw new BadRequestException(
+          `Stock insuficiente. Stock actual: ${item.stock}, cantidad solicitada: ${createTransactionDto.quantity}`,
+        );
+      }
+    }
+
+    // 4. Calcular nuevo stock
+    let newStock: number;
+    if (createTransactionDto.type === TransactionType.ENTRADA) {
+      newStock = item.stock + createTransactionDto.quantity;
+    } else {
+      newStock = item.stock - createTransactionDto.quantity;
+    }
+
+    // 5. Validación adicional: el stock nunca puede ser negativo
+    if (newStock < 0) {
+      throw new BadRequestException(
+        'La transacción resultaría en stock negativo',
+      );
+    }
+
+    // 6. Actualizar el stock del item
+    item.stock = newStock;
+    item.updatedAt = new Date();
+
+    // 7. Crear registro de transacción (en un sistema real, esto se guardaría en DB)
+    const transaction: Transaction = {
+      id: Date.now(), // Mock ID
+      itemId: item.id,
+      item: item,
+      type: createTransactionDto.type,
+      quantity: createTransactionDto.quantity,
+      previousStock,
+      newStock,
+      user: createTransactionDto.user || 'system',
+      timestamp: new Date(),
+    };
+
+    // En un sistema real con TypeORM, guardaríamos la transacción aquí
+    // await this.transactionRepository.save(transaction);
+
+    // 8. Retornar el item actualizado
+    return item;
   }
 }
