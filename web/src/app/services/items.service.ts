@@ -9,7 +9,7 @@ import { CreateTransactionDto } from '../models/transaction.model';
 })
 export class ItemsService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api/items';
+  private apiUrl = 'http://localhost:3001/api/items';
 
   getAll(): Observable<Item[]> {
     return this.http.get<Item[]>(this.apiUrl);

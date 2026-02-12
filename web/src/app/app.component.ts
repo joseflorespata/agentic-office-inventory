@@ -1,7 +1,9 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ItemsService } from './services/items.service';
+import { NotificationService } from './services/notification.service';
+import { ToastComponent } from './components/toast/toast.component';
 import { Item } from './models/item.model';
 import {
   TransactionType,
@@ -10,12 +12,13 @@ import {
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ToastComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
 export class AppComponent implements OnInit {
   private itemsService = inject(ItemsService);
+  private notificationService = inject(NotificationService);
 
   // Signals para reactividad
   items = signal<Item[]>([]);
@@ -23,7 +26,15 @@ export class AppComponent implements OnInit {
   showModal = signal<boolean>(false);
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
-  successMessage = signal<string | null>(null);
+
+  // Computed signals
+  totalItems = computed(() => this.items().length);
+  lowStockItems = computed(() =>
+    this.items().filter((item) => item.stock <= item.criticalLimit)
+  );
+  totalValue = computed(() =>
+    this.items().reduce((sum, item) => sum + item.stock * item.unitPrice, 0)
+  );
 
   // Form data
   transactionType = signal<TransactionType>(TransactionType.ENTRADA);
@@ -101,15 +112,33 @@ export class AppComponent implements OnInit {
         );
         this.items.set(updatedItems);
 
-        this.successMessage.set(
-          `Transacción exitosa! Nuevo stock: ${updatedItem.stock}`
+        // Mostrar notificación de éxito
+        const transactionTypeText =
+          dto.type === TransactionType.ENTRADA ? 'entrada' : 'salida';
+        this.notificationService.success(
+          'Transacción exitosa',
+          `${transactionTypeText} de ${dto.quantity} unidades registrada. Nuevo stock: ${updatedItem.stock}`
         );
-        setTimeout(() => this.successMessage.set(null), 3000);
+
+        // Alerta si el stock queda crítico
+        if (
+          updatedItem.stock <= updatedItem.criticalLimit &&
+          dto.type === TransactionType.SALIDA
+        ) {
+          this.notificationService.warning(
+            'Stock crítico',
+            `${updatedItem.name} ha alcanzado el límite crítico. Stock actual: ${updatedItem.stock}`
+          );
+        }
 
         this.closeModal();
         this.loading.set(false);
       },
       error: (err) => {
+        this.notificationService.error(
+          'Error en la transacción',
+          err.error?.message || 'No se pudo procesar la transacción'
+        );
         this.error.set(
           err.error?.message || 'Error al procesar la transacción'
         );
@@ -125,10 +154,28 @@ export class AppComponent implements OnInit {
 
   getCategoryColor(category: string): string {
     const colors: { [key: string]: string } = {
-      Hardware: 'bg-blue-100 text-blue-800',
-      Papelería: 'bg-green-100 text-green-800',
-      Periféricos: 'bg-purple-100 text-purple-800',
+      Hardware: 'bg-blue-100 text-blue-700',
+      Papelería: 'bg-emerald-100 text-emerald-700',
+      Periféricos: 'bg-purple-100 text-purple-700',
     };
-    return colors[category] || 'bg-gray-100 text-gray-800';
+    return colors[category] || 'bg-slate-100 text-slate-700';
+  }
+
+  getCategoryGradient(category: string): string {
+    const gradients: { [key: string]: string } = {
+      Hardware: 'bg-gradient-to-r from-blue-50 to-blue-100',
+      Papelería: 'bg-gradient-to-r from-emerald-50 to-emerald-100',
+      Periféricos: 'bg-gradient-to-r from-purple-50 to-purple-100',
+    };
+    return gradients[category] || 'bg-gradient-to-r from-slate-50 to-slate-100';
+  }
+
+  getCategoryIconBg(category: string): string {
+    const backgrounds: { [key: string]: string } = {
+      Hardware: 'bg-blue-500',
+      Papelería: 'bg-emerald-500',
+      Periféricos: 'bg-purple-500',
+    };
+    return backgrounds[category] || 'bg-slate-500';
   }
 }
